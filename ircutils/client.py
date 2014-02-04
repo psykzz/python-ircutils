@@ -179,15 +179,33 @@ class SimpleClient(object):
         """
         self.events.register_listener(event_name, listener)
     
+    def identify(self, *args):
+        """ Identify yourself with the service determinted by
+        your current network.
+        """
+        if 'quakenet' in self.conn.hostname:
+            if len(args) != 2:
+                return 
+            identify_quakenet(*args)
+
+        if len(args) != 1:
+            raise Exception("Incorrect number of arguments supplied, expecting either self.identify(<username>,<password>) OR self.identify(<password>)")
+        self.identify_ns(*args)
     
-    def identify(self, ns_password):
+    def identify_ns(self, ns_password):
         """ Identify yourself with the NickServ service on IRC.
         This assumes that NickServ is present on the server.
         
         """
         self.send_message("NickServ", "IDENTIFY {0}".format(ns_password))
-    
-    
+        
+    def identify_quakenet(self, username, password):
+        """ Identify yourself with QuakeNet's Q service on IRC.
+        Example:
+            /msg Q@CServe.quakenet.org AUTH <user> <password>
+        """
+        self.send_message("Q@CServe.quakenet.org", "AUTH {} {}".format(username, password))
+
     def join_channel(self, channel, key=None):
         """ Join the specified channel. Optionally, provide a key to the channel
         if it requires one.
